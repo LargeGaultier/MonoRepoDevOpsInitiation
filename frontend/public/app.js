@@ -5,9 +5,25 @@ async function fetchPosts() {
   const posts = await res.json();
   const postsList = document.getElementById('posts');
   postsList.innerHTML = '';
+
   posts.forEach(post => {
     const li = document.createElement('li');
-    li.innerHTML = `<strong>${post.title}</strong>: ${post.content} <button onclick="deletePost(${post.id})">🗑️</button>`;
+
+    // Title
+    const titleEl = document.createElement('strong');
+    titleEl.textContent = post.title;
+    li.appendChild(titleEl);
+
+    // Content text
+    const textNode = document.createTextNode(`: ${post.content} `);
+    li.appendChild(textNode);
+
+    // Delete button with real JS handler
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = '🗑️';
+    deleteBtn.addEventListener('click', () => deletePost(post.id));
+    li.appendChild(deleteBtn);
+
     postsList.appendChild(li);
   });
 }
@@ -17,20 +33,26 @@ async function deletePost(id) {
   fetchPosts();
 }
 
-document.getElementById('post-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const title = document.getElementById('title').value;
-  const content = document.getElementById('content').value;
+document
+  .getElementById('post-form')
+  .addEventListener('submit', async e => {
+    e.preventDefault();
+    const titleInput = document.getElementById('title');
+    const contentInput = document.getElementById('content');
 
-  await fetch(apiUrl, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title, content })
+    await fetch(apiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: titleInput.value,
+        content: contentInput.value
+      })
+    });
+
+    titleInput.value = '';
+    contentInput.value = '';
+    fetchPosts();
   });
 
-  document.getElementById('title').value = '';
-  document.getElementById('content').value = '';
-  fetchPosts();
-});
-
+// Initial load
 fetchPosts();
