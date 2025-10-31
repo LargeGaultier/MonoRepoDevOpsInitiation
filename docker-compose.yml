@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: mini_blog_db
@@ -8,8 +6,8 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_DB: blog
-    secrets:
-    - db_password
+      # Use DB_PASSWORD from environment (.env) or fallback to 'postgres' for local dev
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./backend/src/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -23,10 +21,9 @@ services:
     environment:
       DB_HOST: db
       DB_USER: postgres
-      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      # Backend reads DB password from environment variable
+      DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: blog
-    secrets:
-    - db_password
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -50,7 +47,4 @@ services:
 volumes:
   pgdata:
 
-secrets:
-  db_password:
-    external: true
   
